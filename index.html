@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Smart Build Budget & Expense Tracker</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Sinhala', sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            overflow-x: hidden;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #311042 70%, #0f172a 100%);
+            background-attachment: fixed;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.93);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .glass-header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .glass-card { background: white !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen p-4 sm:p-6 md:p-8 text-slate-800 flex items-center justify-center">
+
+    <!-- LOGIN / AUTHENTICATION SCREEN -->
+    <div id="login-screen" class="w-full max-w-md glass-card p-8 rounded-3xl shadow-2xl text-center space-y-6 border border-white/40">
+        <div class="w-16 h-16 bg-gradient-to-tr from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-orange-500/30">
+            <i class="fas fa-lock text-2xl text-slate-950"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Smart Build Tracker</h2>
+            <p class="text-xs text-slate-500 mt-1 font-medium">පද්ධතියට ඇතුළු වීමට Access PIN එක ඇතුළත් කරන්න</p>
+        </div>
+
+        <form id="login-form" class="space-y-4">
+            <div>
+                <input type="password" id="pin-input" placeholder="enter PIN..." class="w-full text-center text-xl tracking-widest font-mono rounded-xl border border-slate-300 p-3.5 focus:ring-2 focus:ring-amber-500 outline-none bg-white/80" required>
+                <p id="login-error" class="text-xs text-rose-600 font-bold mt-2 hidden"><i class="fas fa-exclamation-circle"></i> ඇතුළත් කළ PIN අංකය වැරදියි!</p>
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all active:scale-95 text-sm">
+                Unlock System <i class="fas fa-arrow-right ml-1"></i>
+            </button>
+        </form>
+        
+        <p class="text-[11px] text-slate-400">Default PIN එක: <span class="font-mono font-bold text-slate-600">1234</span> (ඇතුළු වූ පසු වෙනස් කළ හැක)</p>
+    </div>
+
+    <!-- MAIN APP DASHBOARD (HIDDEN UNTIL LOGIN) -->
+    <div id="app-screen" class="max-w-6xl mx-auto space-y-6 w-full hidden">
+        <!-- Header -->
+        <div class="glass-header text-white p-6 rounded-2xl shadow-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-amber-400 to-orange-500 p-3 rounded-xl shadow-lg shadow-orange-500/30">
+                        <i class="fas fa-hammer text-xl text-slate-950"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-300">
+                            Smart Build Budget Tracker
+                        </h1>
+                        <p class="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">නිවාස ඉදිකිරීමේ වියදම් සහ බජට් කළමනාකරණ පද්ධතිය</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2.5 no-print w-full sm:w-auto">
+                <button onclick="changePIN()" class="bg-white/10 hover:bg-white/20 text-slate-200 border border-white/20 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="fas fa-key text-amber-400"></i> Change PIN
+                </button>
+                <button onclick="window.print()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold px-4 py-2 rounded-xl shadow-lg hover:scale-[1.02] transition flex items-center gap-1.5 text-xs">
+                    <i class="fas fa-file-pdf"></i> Print PDF
+                </button>
+                <button onclick="clearAllData()" class="bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 px-3.5 py-2 rounded-xl font-semibold transition text-xs flex items-center gap-1.5">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
+                <button onclick="logout()" class="bg-slate-700/50 hover:bg-slate-700/80 text-slate-300 border border-slate-600 px-3.5 py-2 rounded-xl font-semibold transition text-xs flex items-center gap-1.5">
+                    <i class="fas fa-sign-out-alt"></i> Lock
+                </button>
+            </div>
+        </div>
+
+        <!-- Target Budget Section -->
+        <div class="glass-card p-5 rounded-2xl shadow-xl no-print flex flex-col sm:flex-row items-center justify-between gap-4 border-l-4 border-l-amber-500">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-amber-100 text-amber-700 rounded-xl">
+                    <i class="fas fa-bullseye text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-sm">මුළු ඇස්තමේන්තුගත බජට් සීමාව (Overall Target Budget)</h3>
+                    <p class="text-xs text-slate-500">ඔබ ළඟ මුළු ප්‍රමාණය තිබේ නම් ඇතුළත් කරන්න (නැතහොත් හිස්ව තබන්න)</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <span class="text-sm font-bold text-slate-600">Rs.</span>
+                <input type="number" id="overall-target-input" placeholder="e.g. 5000000" class="w-full sm:w-56 rounded-xl border border-slate-300 p-2.5 text-sm font-mono focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                <button onclick="setOverallTarget()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-sm transition">
+                    Set
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary Dashboard -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="glass-card p-6 rounded-2xl shadow-xl relative overflow-hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500" id="est-card-title">Target Budget</span>
+                    <span class="p-2 bg-blue-100 text-blue-600 rounded-lg text-xs"><i class="fas fa-calculator"></i></span>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
+                    Rs. <span id="total-est">0.00</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-2" id="est-card-sub">නියමිත Target Budget එක</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl shadow-xl relative overflow-hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Actual Spent</span>
+                    <span class="p-2 bg-purple-100 text-purple-600 rounded-lg text-xs"><i class="fas fa-receipt"></i></span>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-purple-700 tracking-tight font-mono">
+                    Rs. <span id="total-act">0.00</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">සිදු වූ මුළු වියදම</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl shadow-xl relative overflow-hidden" id="balance-card">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Target Balance / Variance</span>
+                    <span class="p-2 bg-emerald-100 text-emerald-600 rounded-lg text-xs"><i class="fas fa-wallet"></i></span>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono" id="balance-text-color">
+                    Rs. <span id="total-diff">0.00</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-2" id="balance-status-label">බජට් ඉතිරිය හෝ වැඩිපුර වියදම</p>
+            </div>
+        </div>
+
+        <!-- Forms & Tables -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-4 no-print">
+                <div class="glass-card p-6 rounded-2xl shadow-xl space-y-4">
+                    <div class="flex items-center space-x-2 border-b border-slate-200 pb-3">
+                        <i class="fas fa-plus-circle text-indigo-600 text-lg"></i>
+                        <h2 class="text-base font-bold text-slate-800">නව වියදමක් එකතු කරන්න</h2>
+                    </div>
+
+                    <form id="budget-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Phase / අදියර</label>
+                            <input type="text" id="phase" list="phase-suggestions" placeholder="e.g. අත්තිවාරම..." class="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none bg-white" required>
+                            <datalist id="phase-suggestions">
+                                <option value="අත්තිවාරම (Foundation)">
+                                <option value="බිත්ති බැඳීම (Structure)">
+                                <option value="වහලය (Roofing)">
+                                <option value="ප්ලම්බින් සහ විදුලි (Plumbing/Electrical)">
+                                <option value="ප්ලාස්ටර් සහ ටයිල් (Tiling/Plastering)">
+                                <option value="දොර ජනේල (Doors/Windows)">
+                                <option value="ෆිනිෂින් (Finishing)">
+                            </datalist>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Item / වියදම් විස්තරය</label>
+                            <input type="text" id="itemName" placeholder="උදා: සිමෙන්ති කොට්ට 100ක්" class="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none bg-white" required>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Item Est. (Rs)</label>
+                                <input type="number" id="estCost" min="0" step="any" placeholder="0.00" class="w-full rounded-xl border border-slate-300 p-3 text-sm font-mono outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Actual Cost (Rs)</label>
+                                <input type="number" id="actCost" min="0" step="any" placeholder="0.00" class="w-full rounded-xl border border-slate-300 p-3 text-sm font-mono outline-none bg-white">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:from-indigo-700 hover:to-purple-700 transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fas fa-check-circle"></i> එක් කරන්න (Add Item)
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 space-y-6">
+                <div class="glass-card p-6 rounded-2xl shadow-xl">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-chart-pie text-purple-600 text-lg"></i>
+                            <h2 class="text-base font-bold text-slate-800">අදියර අනුව වියදම් විශ්ලේෂණය</h2>
+                        </div>
+                    </div>
+                    <div class="relative h-64 sm:h-72 w-full flex items-center justify-center">
+                        <canvas id="phaseChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl shadow-xl overflow-hidden">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-list-alt text-blue-600 text-lg"></i>
+                            <h2 class="text-base font-bold text-slate-800">වියදම් සටහන් (Expense Records)</h2>
+                        </div>
+                        <span id="record-count" class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full">0 Records</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 text-xs uppercase font-bold border-b border-slate-200">
+                                    <th class="p-3">Phase & Item</th>
+                                    <th class="p-3 text-right">Estimated</th>
+                                    <th class="p-3 text-right">Actual Spent</th>
+                                    <th class="p-3 text-right">Status / Variance</th>
+                                    <th class="p-3 text-center no-print">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="text-sm divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="empty-state" class="text-center py-10 text-slate-400">
+                        <i class="fas fa-clipboard-list text-4xl mb-3 text-slate-300"></i>
+                        <p class="text-sm font-medium">තවම කිසිදු වියදමක් ඇතුළත් කර නොමැත.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. ANTI-COPY & ANTI-INSPECT PROTECTION SCRIPT -->
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode === 123) return false;
+            if (e.ctrlKey && e.keyCode === 'U'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 'I'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 'C'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 'J'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.keyCode === 'S'.charCodeAt(0)) return false;
+        };
+    </script>
+
+    <!-- 2. LIVE GOOGLE DRIVE DATABASE DEVICE-LOCK SCRIPT -->
+    <script>
+        (function() {
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvEOijNAgkKmucXoNPWT6D0uESaVGl1zM70Wm03ql_ySepn1s9jwoud3_Go77HBQCW/exec";
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const clientKey = urlParams.get('key');
+
+            if (!clientKey) {
+                showBlocked("⛔ Access Denied!", "Valid License Key Required in URL (e.g. ?key=build_001)");
+                return;
+            }
+
+            const deviceFP = window.btoa(navigator.userAgent + screen.width + "x" + screen.height);
+
+            fetch(`${GOOGLE_SCRIPT_URL}?key=${encodeURIComponent(clientKey)}&device=${encodeURIComponent(deviceFP)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "SUCCESS") {
+                        console.log("Smart Build Budget Tracker License Verified!");
+                    } else {
+                        showBlocked("⛔ Access Denied!", data.message);
+                    }
+                })
+                .catch(err => {
+                    showBlocked("⛔ Verification Error", "Unable to connect to Google Drive verification server.");
+                });
+
+            function showBlocked(title, msg) {
+                document.body.innerHTML = `
+                    <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0b1120; color:#ef4444; font-family:sans-serif; text-align:center; padding:20px;">
+                        <div style="background:#1e293b; padding:30px; border-radius:16px; border:1px solid #ef4444; max-width:420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);">
+                            <h1 style="font-size:1.5rem; margin-bottom:12px; color:#ef4444;">${title}</h1>
+                            <p style="color:#94a3b8; font-size:0.9rem; line-height:1.5;">${msg}</p>
+                        </div>
+                    </div>`;
+            }
+        })();
+    </script>
+
+    <!-- 3. MAIN APP LOGIC SCRIPT -->
+    <script>
+        const DEFAULT_PIN = "1234";
+        let userPIN = localStorage.getItem('appPIN') || DEFAULT_PIN;
+
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen = document.getElementById('app-screen');
+        const loginForm = document.getElementById('login-form');
+        const pinInput = document.getElementById('pin-input');
+        const loginError = document.getElementById('login-error');
+
+        // Check Login Session
+        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+            showApp();
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (pinInput.value === userPIN) {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                loginError.classList.add('hidden');
+                showApp();
+            } else {
+                loginError.classList.remove('hidden');
+                pinInput.value = '';
+            }
+        });
+
+        function showApp() {
+            loginScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            document.body.classList.remove('flex', 'items-center', 'justify-center');
+            renderTable();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isLoggedIn');
+            location.reload();
+        }
+
+        function changePIN() {
+            const current = prompt("වත්මන් PIN අංකය ඇතුළත් කරන්න:");
+            if (current === userPIN) {
+                const newPIN = prompt("නව PIN අංකය ඇතුළත් කරන්න (අවම වශයෙන් ඉලක්කම් 4ක්):");
+                if (newPIN && newPIN.trim().length >= 4) {
+                    userPIN = newPIN.trim();
+                    localStorage.setItem('appPIN', userPIN);
+                    alert("PIN අංකය සාර්ථකව වෙනස් විය!");
+                } else {
+                    alert("PIN අංකය අවම වශයෙන් ඉලක්කම් 4ක් විය යුතුය!");
+                }
+            } else if (current !== null) {
+                alert("වත්මන් PIN අංකය වැරදියි!");
+            }
+        }
+
+        // APP CORE LOGIC
+        let expenses = JSON.parse(localStorage.getItem('budgetDataV5')) || [];
+        let overallTargetBudget = parseFloat(localStorage.getItem('overallTargetBudgetV5')) || 0;
+        let myChart = null;
+
+        const form = document.getElementById('budget-form');
+        const tableBody = document.getElementById('table-body');
+        const emptyState = document.getElementById('empty-state');
+        const recordCount = document.getElementById('record-count');
+        const targetInput = document.getElementById('overall-target-input');
+
+        if(overallTargetBudget > 0) targetInput.value = overallTargetBudget;
+
+        const formatMoney = (num) => Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        function setOverallTarget() {
+            const val = parseFloat(targetInput.value);
+            if (!isNaN(val) && val >= 0) {
+                overallTargetBudget = val;
+                localStorage.setItem('overallTargetBudgetV5', overallTargetBudget);
+            } else {
+                overallTargetBudget = 0;
+                localStorage.removeItem('overallTargetBudgetV5');
+                targetInput.value = '';
+            }
+            renderTable();
+        }
+
+        function updateDashboardAndChart() {
+            let sumItemEst = 0, sumActual = 0, phaseDataMap = {};
+
+            expenses.forEach(exp => {
+                const est = parseFloat(exp.estCost) || 0;
+                const act = parseFloat(exp.actCost) || 0;
+                sumItemEst += est;
+                sumActual += act;
+
+                const phaseName = exp.phase.trim();
+                phaseDataMap[phaseName] = (phaseDataMap[phaseName] || 0) + act;
+            });
+
+            const baseBudget = overallTargetBudget > 0 ? overallTargetBudget : sumItemEst;
+            const diff = baseBudget - sumActual;
+
+            if (overallTargetBudget > 0) {
+                document.getElementById('est-card-title').innerText = "Overall Target Budget";
+                document.getElementById('est-card-sub').innerText = `අයිතම ඇස්තමේන්තු එකතුව: Rs. ${formatMoney(sumItemEst)}`;
+                document.getElementById('total-est').innerText = formatMoney(overallTargetBudget);
+            } else {
+                document.getElementById('est-card-title').innerText = "Total Estimated Budget";
+                document.getElementById('est-card-sub').innerText = "අයිතමවල එකතුවෙන් සෑදුණු බජට් එක";
+                document.getElementById('total-est').innerText = formatMoney(sumItemEst);
+            }
+
+            document.getElementById('total-act').innerText = formatMoney(sumActual);
+            
+            const diffEl = document.getElementById('total-diff');
+            const balanceTextColor = document.getElementById('balance-text-color');
+            const balanceStatusLabel = document.getElementById('balance-status-label');
+
+            diffEl.innerText = formatMoney(Math.abs(diff));
+
+            if (diff < 0) {
+                balanceTextColor.className = "text-2xl sm:text-3xl font-extrabold text-rose-600 font-mono";
+                balanceStatusLabel.innerText = "Target Budget එක ඉක්මවා ගොස් ඇත!";
+            } else {
+                balanceTextColor.className = "text-2xl sm:text-3xl font-extrabold text-emerald-600 font-mono";
+                balanceStatusLabel.innerText = "Target Budget එකෙන් ඉතිරි මුදල";
+            }
+
+            recordCount.innerText = `${expenses.length} Records`;
+            renderChart(phaseDataMap);
+        }
+
+        function renderChart(phaseDataMap) {
+            const ctx = document.getElementById('phaseChart').getContext('2d');
+            const labels = Object.keys(phaseDataMap);
+            const dataValues = Object.values(phaseDataMap);
+
+            if (myChart) myChart.destroy();
+
+            if (labels.length === 0 || dataValues.every(val => val === 0)) {
+                myChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels: ['No Actual Data'], datasets: [{ data: [1], backgroundColor: ['#e2e8f0'] }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+                return;
+            }
+
+            const colors = ['#6366f1', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#06b6d4', '#f43f5e', '#3b82f6'];
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Actual Spent (Rs)', data: dataValues, backgroundColor: colors.slice(0, labels.length) }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function renderTable() {
+            tableBody.innerHTML = '';
+            if (expenses.length === 0) emptyState.classList.remove('hidden');
+            else emptyState.classList.add('hidden');
+
+            expenses.forEach((exp, index) => {
+                const est = parseFloat(exp.estCost) || 0;
+                const act = parseFloat(exp.actCost) || 0;
+                const diff = est - act;
+
+                let statusBadge = '';
+                if (act === 0) statusBadge = `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-md text-xs font-bold">Pending Actual</span>`;
+                else if (diff >= 0) statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-xs font-bold">ඉතිරි Rs.${formatMoney(diff)}</span>`;
+                else statusBadge = `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded-md text-xs font-bold">වැඩිපුර Rs.${formatMoney(Math.abs(diff))}</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="font-bold text-slate-800">${exp.itemName}</div>
+                        <div class="text-xs font-medium text-indigo-600 bg-indigo-50 w-fit px-2 py-0.5 rounded mt-0.5">${exp.phase}</div>
+                    </td>
+                    <td class="p-3 text-right font-mono text-slate-600">${est > 0 ? 'Rs. ' + formatMoney(est) : '-'}</td>
+                    <td class="p-3 text-right font-mono text-slate-900 font-bold">${act > 0 ? 'Rs. ' + formatMoney(act) : '<span class="text-slate-400 font-normal italic text-xs">නොමැත</span>'}</td>
+                    <td class="p-3 text-right">${statusBadge}</td>
+                    <td class="p-3 text-center no-print">
+                        <div class="flex items-center justify-center space-x-1">
+                            <button onclick="editActualCost(${index})" class="text-indigo-600 hover:text-indigo-800 p-2 rounded-lg" title="Edit Actual Spent"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteRecord(${index})" class="text-slate-400 hover:text-rose-600 p-2 rounded-lg" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            updateDashboardAndChart();
+            localStorage.setItem('budgetDataV5', JSON.stringify(expenses));
+        }
+
+        function editActualCost(index) {
+            const currentItem = expenses[index];
+            const newActual = prompt(`"${currentItem.itemName}" සඳහා සිදු වූ සැබෑ වියදම (Actual Spent - Rs):`, currentItem.actCost || 0);
+            if (newActual !== null && !isNaN(newActual) && newActual !== '') {
+                expenses[index].actCost = parseFloat(newActual);
+                renderTable();
+            }
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const estInput = document.getElementById('estCost').value;
+            const actInput = document.getElementById('actCost').value;
+            expenses.push({
+                phase: document.getElementById('phase').value,
+                itemName: document.getElementById('itemName').value,
+                estCost: estInput !== '' ? parseFloat(estInput) : 0,
+                actCost: actInput !== '' ? parseFloat(actInput) : 0
+            });
+            form.reset();
+            renderTable();
+        });
+
+        function deleteRecord(index) {
+            if(confirm("මෙම සටහන ඉවත් කිරීමට ඔබට විශ්වාසද?")) {
+                expenses.splice(index, 1);
+                renderTable();
+            }
+        }
+
+        function clearAllData() {
+            if(confirm("සියලුම ඇතුළත් කළ දත්ත සහ Target Budget එක මකා දැමීමට ඔබට විශ්වාසද?")) {
+                expenses = [];
+                overallTargetBudget = 0;
+                localStorage.removeItem('budgetDataV5');
+                localStorage.removeItem('overallTargetBudgetV5');
+                targetInput.value = '';
+                renderTable();
+            }
+        }
+    </script>
+</body>
+</html>
