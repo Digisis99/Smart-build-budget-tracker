@@ -39,6 +39,10 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        #syncBadge { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
+        .sync-success { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .sync-loading { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; color: black !important; padding: 0 !important; }
@@ -55,7 +59,7 @@
         </div>
         <div>
             <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Smart Build Tracker</h2>
-            <p class="text-xs text-slate-500 mt-1 font-medium">පද්ධතියට ඇතුළු වීමට Access PIN එක ඇතුළත් කරන්න</p>
+            <p class="text-xs text-slate-500 mt-1 font-medium">පද්ධතියට පිවිසීමට Access PIN අංකය ඇතුළත් කරන්න</p>
         </div>
 
         <form id="login-form" class="space-y-4">
@@ -68,7 +72,7 @@
             </button>
         </form>
         
-        <p class="text-[11px] text-slate-400">Default PIN එක: <span class="font-mono font-bold text-slate-600">1234</span> (ඇතුළු වූ පසු වෙනස් කළ හැක)</p>
+        <p class="text-[11px] text-slate-400">Default PIN: <span class="font-mono font-bold text-slate-600">1234</span> (පසුව වෙනස් කරගත හැක)</p>
     </div>
 
     <!-- MAIN APP DASHBOARD (HIDDEN UNTIL LOGIN) -->
@@ -81,10 +85,11 @@
                         <i class="fas fa-hammer text-xl text-slate-950"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-300">
+                        <h1 class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-300 flex items-center gap-3">
                             Smart Build Budget Tracker
+                            <span id="syncBadge" class="sync-success"><i class="fa-solid fa-cloud-check"></i> Cloud Synced</span>
                         </h1>
-                        <p class="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">නිවාස ඉදිකිරීමේ වියදම් සහ බජට් කළමනාකරණ පද්ධතිය</p>
+                        <p class="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">ගොඩනැගිලි පිරිවැය සහ වියදම් කළමනාකරණ පද්ධතිය</p>
                     </div>
                 </div>
             </div>
@@ -112,8 +117,8 @@
                     <i class="fas fa-bullseye text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-slate-800 text-sm">මුළු ඇස්තමේන්තුගත බජට් සීමාව (Overall Target Budget)</h3>
-                    <p class="text-xs text-slate-500">ඔබ ළඟ මුළු ප්‍රමාණය තිබේ නම් ඇතුළත් කරන්න (නැතහොත් හිස්ව තබන්න)</p>
+                    <h3 class="font-bold text-slate-800 text-sm">සම්පූර්ණ ව්‍යාපෘති ඉලක්ක ගත බජට් එක (Overall Target Budget)</h3>
+                    <p class="text-xs text-slate-500">ඔබගේ මුළු ව්‍යාපෘතිය සඳහා වෙන් කළ මුදල ඇතුළත් කරන්න</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -135,7 +140,7 @@
                 <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
                     Rs. <span id="total-est">0.00</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2" id="est-card-sub">නියමිත Target Budget එක</p>
+                <p class="text-xs text-slate-500 mt-2" id="est-card-sub">ඉලක්කගත Target Budget එක</p>
             </div>
 
             <div class="glass-card p-6 rounded-2xl shadow-xl relative overflow-hidden">
@@ -146,7 +151,7 @@
                 <div class="text-2xl sm:text-3xl font-extrabold text-purple-700 tracking-tight font-mono">
                     Rs. <span id="total-act">0.00</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2">සිදු වූ මුළු වියදම</p>
+                <p class="text-xs text-slate-500 mt-2">සැබවින්ම සිදු වූ මුළු වියදම</p>
             </div>
 
             <div class="glass-card p-6 rounded-2xl shadow-xl relative overflow-hidden" id="balance-card">
@@ -157,7 +162,7 @@
                 <div class="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono" id="balance-text-color">
                     Rs. <span id="total-diff">0.00</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2" id="balance-status-label">බජට් ඉතිරිය හෝ වැඩිපුර වියදම</p>
+                <p class="text-xs text-slate-500 mt-2" id="balance-status-label">ඉතිරි මුදල හෝ අතිරේක වියදම</p>
             </div>
         </div>
 
@@ -167,27 +172,27 @@
                 <div class="glass-card p-6 rounded-2xl shadow-xl space-y-4">
                     <div class="flex items-center space-x-2 border-b border-slate-200 pb-3">
                         <i class="fas fa-plus-circle text-indigo-600 text-lg"></i>
-                        <h2 class="text-base font-bold text-slate-800">නව වියදමක් එකතු කරන්න</h2>
+                        <h2 class="text-base font-bold text-slate-800">නව වියදමක් ඇතුළත් කරන්න</h2>
                     </div>
 
                     <form id="budget-form" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Phase / අදියර</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Phase / පියවර</label>
                             <input type="text" id="phase" list="phase-suggestions" placeholder="e.g. අත්තිවාරම..." class="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none bg-white" required>
                             <datalist id="phase-suggestions">
                                 <option value="අත්තිවාරම (Foundation)">
-                                <option value="බිත්ති බැඳීම (Structure)">
+                                <option value="කොන්ක්‍රීට් සහ සැකිල්ල (Structure)">
                                 <option value="වහලය (Roofing)">
-                                <option value="ප්ලම්බින් සහ විදුලි (Plumbing/Electrical)">
-                                <option value="ප්ලාස්ටර් සහ ටයිල් (Tiling/Plastering)">
+                                <option value="ප්ලම්බින් සහ විදුලිය (Plumbing/Electrical)">
+                                <option value="ටයිල් සහ කපරාරුව (Tiling/Plastering)">
                                 <option value="දොර ජනේල (Doors/Windows)">
-                                <option value="ෆිනිෂින් (Finishing)">
+                                <option value="ෆිනිශින් (Finishing)">
                             </datalist>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Item / වියදම් විස්තරය</label>
-                            <input type="text" id="itemName" placeholder="උදා: සිමෙන්ති කොට්ට 100ක්" class="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none bg-white" required>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Item / භාණ්ඩය හෝ සේවාව</label>
+                            <input type="text" id="itemName" placeholder="උදා: සිමෙන්ති කොට්ට 100යි" class="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none bg-white" required>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
@@ -202,7 +207,7 @@
                         </div>
 
                         <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:from-indigo-700 hover:to-purple-700 transition flex items-center justify-center gap-2 text-sm">
-                            <i class="fas fa-check-circle"></i> එක් කරන්න (Add Item)
+                            <i class="fas fa-check-circle"></i> එකතු කරන්න (Add Item)
                         </button>
                     </form>
                 </div>
@@ -213,7 +218,7 @@
                     <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
                         <div class="flex items-center space-x-2">
                             <i class="fas fa-chart-pie text-purple-600 text-lg"></i>
-                            <h2 class="text-base font-bold text-slate-800">අදියර අනුව වියදම් විශ්ලේෂණය</h2>
+                            <h2 class="text-base font-bold text-slate-800">පියවර අනුව වියදම් ප්‍රතිශතය</h2>
                         </div>
                     </div>
                     <div class="relative h-64 sm:h-72 w-full flex items-center justify-center">
@@ -225,7 +230,7 @@
                     <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
                         <div class="flex items-center space-x-2">
                             <i class="fas fa-list-alt text-blue-600 text-lg"></i>
-                            <h2 class="text-base font-bold text-slate-800">වියදම් සටහන් (Expense Records)</h2>
+                            <h2 class="text-base font-bold text-slate-800">වියදම් ලේඛනය (Expense Records)</h2>
                         </div>
                         <span id="record-count" class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full">0 Records</span>
                     </div>
@@ -267,26 +272,37 @@
         };
     </script>
 
-    <!-- 2. LIVE GOOGLE DRIVE DATABASE DEVICE-LOCK SCRIPT -->
+    <!-- 2. LIVE GOOGLE DRIVE DATABASE DEVICE-LOCK & AUTO-SYNC SCRIPT -->
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const clientKey = urlParams.get('key');
+        const customEndpoint = urlParams.get('endpoint');
+
+        // ඔබ ලබාගත් Google Web App URL එක මෙතැනට තබන්න:
+        const DEFAULT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzvEOijNAgkKmucXoNPWT6D0uESaVGl1zM70Wm03ql_ySepn1s9jwoud3_Go77HBQCW/exec";
+        const GOOGLE_SCRIPT_URL = customEndpoint ? decodeURIComponent(customEndpoint) : DEFAULT_ENDPOINT;
+
+        let isLicenseVerified = false;
+
         (function() {
-            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvEOijNAgkKmucXoNPWT6D0uESaVGl1zM70Wm03ql_ySepn1s9jwoud3_Go77HBQCW/exec";
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const clientKey = urlParams.get('key');
-
             if (!clientKey) {
-                showBlocked("⛔ Access Denied!", "Valid License Key Required in URL");
+                showBlocked("⛔ Access Denied!", "Valid License Key Required in URL (e.g. ?key=build_001)");
                 return;
             }
 
-            const deviceFP = window.btoa(navigator.userAgent + screen.width + "x" + screen.height);
+            const deviceFP = window.btoa(navigator.userAgent.replace(/\s+/g, '') + screen.width + "x" + screen.height);
 
             fetch(`${GOOGLE_SCRIPT_URL}?key=${encodeURIComponent(clientKey)}&device=${encodeURIComponent(deviceFP)}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === "SUCCESS") {
-                        console.log("Smart Build Budget Tracker License Verified!");
+                        isLicenseVerified = true;
+                        if (data.cloudData && data.cloudData.trim().length > 0) {
+                            try {
+                                const parsedCloud = JSON.parse(data.cloudData);
+                                restoreStateFromCloud(parsedCloud);
+                            } catch(err) { console.error("Cloud Data Restore Error", err); }
+                        }
                     } else {
                         showBlocked("⛔ Access Denied!", data.message);
                     }
@@ -305,6 +321,31 @@
                     </div>`;
             }
         })();
+
+        function syncDataToCloud(statePayload) {
+            if (!clientKey || !isLicenseVerified) return;
+            const syncBadge = document.getElementById('syncBadge');
+            if (syncBadge) {
+                syncBadge.className = "sync-loading";
+                syncBadge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Syncing...`;
+            }
+
+            const payload = encodeURIComponent(JSON.stringify(statePayload));
+            fetch(`${GOOGLE_SCRIPT_URL}?key=${encodeURIComponent(clientKey)}&action=save_data&payload=${payload}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (syncBadge) {
+                        syncBadge.className = "sync-success";
+                        syncBadge.innerHTML = `<i class="fa-solid fa-cloud-check"></i> Cloud Synced`;
+                    }
+                })
+                .catch(err => {
+                    if (syncBadge) {
+                        syncBadge.className = "sync-loading";
+                        syncBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Sync Failed`;
+                    }
+                });
+        }
     </script>
 
     <!-- 3. MAIN APP LOGIC SCRIPT -->
@@ -318,7 +359,6 @@
         const pinInput = document.getElementById('pin-input');
         const loginError = document.getElementById('login-error');
 
-        // Check Login Session
         if (sessionStorage.getItem('isLoggedIn') === 'true') {
             showApp();
         }
@@ -348,18 +388,18 @@
         }
 
         function changePIN() {
-            const current = prompt("වත්මන් PIN අංකය ඇතුළත් කරන්න:");
+            const current = prompt("වර්තමාන PIN අංකය ඇතුළත් කරන්න:");
             if (current === userPIN) {
                 const newPIN = prompt("නව PIN අංකය ඇතුළත් කරන්න (අවම වශයෙන් ඉලක්කම් 4ක්):");
                 if (newPIN && newPIN.trim().length >= 4) {
                     userPIN = newPIN.trim();
                     localStorage.setItem('appPIN', userPIN);
-                    alert("PIN අංකය සාර්ථකව වෙනස් විය!");
+                    alert("PIN අංකය සාර්ථකව වෙනස් කරන ලදී!");
                 } else {
                     alert("PIN අංකය අවම වශයෙන් ඉලක්කම් 4ක් විය යුතුය!");
                 }
             } else if (current !== null) {
-                alert("වත්මන් PIN අංකය වැරදියි!");
+                alert("වර්තමාන PIN අංකය වැරදියි!");
             }
         }
 
@@ -388,6 +428,7 @@
                 localStorage.removeItem('overallTargetBudgetV5');
                 targetInput.value = '';
             }
+            saveAndSyncBuildState();
             renderTable();
         }
 
@@ -409,11 +450,11 @@
 
             if (overallTargetBudget > 0) {
                 document.getElementById('est-card-title').innerText = "Overall Target Budget";
-                document.getElementById('est-card-sub').innerText = `අයිතම ඇස්තමේන්තු එකතුව: Rs. ${formatMoney(sumItemEst)}`;
+                document.getElementById('est-card-sub').innerText = `අයිතමවල එකතුව: Rs. ${formatMoney(sumItemEst)}`;
                 document.getElementById('total-est').innerText = formatMoney(overallTargetBudget);
             } else {
                 document.getElementById('est-card-title').innerText = "Total Estimated Budget";
-                document.getElementById('est-card-sub').innerText = "අයිතමවල එකතුවෙන් සෑදුණු බජට් එක";
+                document.getElementById('est-card-sub').innerText = "අයිතමවල එකතු කළ අස්තමේන්තු අගය";
                 document.getElementById('total-est').innerText = formatMoney(sumItemEst);
             }
 
@@ -505,7 +546,30 @@
             });
 
             updateDashboardAndChart();
+        }
+
+        function saveAndSyncBuildState() {
+            const statePayload = {
+                expenses: expenses,
+                overallTargetBudget: overallTargetBudget
+            };
             localStorage.setItem('budgetDataV5', JSON.stringify(expenses));
+            localStorage.setItem('overallTargetBudgetV5', overallTargetBudget);
+            syncDataToCloud(statePayload);
+        }
+
+        function restoreStateFromCloud(state) {
+            if (!state) return;
+            if (state.expenses) {
+                expenses = state.expenses;
+                localStorage.setItem('budgetDataV5', JSON.stringify(expenses));
+            }
+            if (state.overallTargetBudget !== undefined) {
+                overallTargetBudget = state.overallTargetBudget;
+                localStorage.setItem('overallTargetBudgetV5', overallTargetBudget);
+                targetInput.value = overallTargetBudget > 0 ? overallTargetBudget : '';
+            }
+            renderTable();
         }
 
         function editActualCost(index) {
@@ -514,6 +578,7 @@
             if (newActual !== null && !isNaN(newActual) && newActual !== '') {
                 expenses[index].actCost = parseFloat(newActual);
                 renderTable();
+                saveAndSyncBuildState();
             }
         }
 
@@ -529,23 +594,26 @@
             });
             form.reset();
             renderTable();
+            saveAndSyncBuildState();
         });
 
         function deleteRecord(index) {
-            if(confirm("මෙම සටහන ඉවත් කිරීමට ඔබට විශ්වාසද?")) {
+            if(confirm("මෙම වියදම් වාර්තාව ඉවත් කිරීමට අවශ්‍යද?")) {
                 expenses.splice(index, 1);
                 renderTable();
+                saveAndSyncBuildState();
             }
         }
 
         function clearAllData() {
-            if(confirm("සියලුම ඇතුළත් කළ දත්ත සහ Target Budget එක මකා දැමීමට ඔබට විශ්වාසද?")) {
+            if(confirm("සියලුම දත්ත සහ Target Budget එක ඉවත් කිරීමට අවශ්‍යද?")) {
                 expenses = [];
                 overallTargetBudget = 0;
                 localStorage.removeItem('budgetDataV5');
                 localStorage.removeItem('overallTargetBudgetV5');
                 targetInput.value = '';
                 renderTable();
+                saveAndSyncBuildState();
             }
         }
     </script>
