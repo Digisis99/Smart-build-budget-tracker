@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Smart Build Budget & Expense Tracker</title>
+    <title>Smart Build Budget & Expense Tracker - Neo-Light OS</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,169 +16,273 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Google Identity Services (GIS) API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <style>
+        :root {
+            --neon-cyan: #06b6d4;
+            --neon-purple: #8b5cf6;
+            --neon-pink: #ec4899;
+            --neon-amber: #f59e0b;
+            --neon-emerald: #10b981;
+        }
+
         body { 
             font-family: 'Plus Jakarta Sans', 'Noto Sans Sinhala', sans-serif;
+            background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #0f172a 45%, #030712 100%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            min-height: 100vh;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
             overflow-x: hidden;
         }
-        .gradient-bg {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #311042 70%, #0f172a 100%);
-            background-attachment: fixed;
-        }
+
+        /* High-End Glassmorphism */
         .glass-card {
-            background: rgba(255, 255, 255, 0.93);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        .glass-card:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.2), 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
         .glass-header {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
         }
-        #syncBadge { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
-        .sync-success { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .sync-loading { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+        /* Neo-Light Glow Animations */
+        .glow-amber {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+            border: 1px solid rgba(245, 158, 11, 0.5);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+            border: 1px solid rgba(6, 182, 212, 0.5);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+            border: 1px solid rgba(139, 92, 246, 0.5);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+        }
+        .glow-rose {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        /* Buttons & Actions */
+        .btn-neo-amber {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #030712;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-neo-amber:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.7);
+        }
+
+        .btn-neo-indigo {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #ffffff;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-neo-indigo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.7);
+        }
+
+        /* Custom Inputs */
+        .neo-input {
+            background: rgba(30, 41, 59, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            color: #f8fafc !important;
+            transition: all 0.3s ease;
+        }
+        .neo-input:focus {
+            border-color: var(--neon-cyan) !important;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4) !important;
+            outline: none !important;
+        }
+
+        /* Table Aesthetics */
+        .table-scroll-container {
+            max-height: 480px;
+            overflow-y: auto;
+            border-radius: 1rem;
+        }
+        .table-scroll-container th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #0f172a;
+        }
+
+        /* Badges */
+        #syncBadge { font-size: 0.75rem; padding: 4px 10px; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
+        .sync-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+        .sync-loading { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4); box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
 
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; color: black !important; padding: 0 !important; }
-            .glass-card { background: white !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
+            .glass-card { background: white !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; color: black !important; }
+            .neo-input { background: white !important; color: black !important; border: 1px solid #94a3b8 !important; }
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen p-4 sm:p-6 md:p-8 text-slate-800 flex items-center justify-center">
+<body class="min-h-screen p-4 sm:p-6 md:p-8 flex items-center justify-center">
 
     <!-- LOGIN / AUTHENTICATION SCREEN -->
-    <div id="login-screen" class="w-full max-w-md glass-card p-8 rounded-3xl shadow-2xl text-center space-y-6 border border-white/40">
-        <div class="w-16 h-16 bg-gradient-to-tr from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-orange-500/30">
-            <i class="fas fa-lock text-2xl text-slate-950"></i>
+    <div id="login-screen" class="w-full max-w-md glass-card p-8 rounded-3xl text-center space-y-6 border border-white/20 glow-purple">
+        <div class="w-20 h-20 bg-gradient-to-tr from-amber-400 via-orange-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-amber-500/30 animate-bounce">
+            <i class="fas fa-hammer text-3xl text-slate-950"></i>
         </div>
         <div>
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Smart Build Tracker</h2>
-            <p class="text-xs text-slate-500 mt-1 font-medium">පද්ධතියට පිවිසීමට Access PIN අංකය ඇතුළත් කරන්න</p>
+            <h2 class="text-2xl font-black text-white tracking-tight flex items-center justify-center gap-2">
+                Smart Build Tracker <span class="text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 px-2 py-0.5 rounded-full font-bold">OS PRO</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1.5 font-medium">පද්ධතියට පිවිසීමට Access PIN අංකය ඇතුළත් කරන්න</p>
         </div>
 
         <form id="login-form" class="space-y-4">
             <div>
-                <input type="password" id="pin-input" placeholder="enter PIN..." class="w-full text-center text-xl tracking-widest font-mono rounded-xl border border-slate-300 p-3.5 focus:ring-2 focus:ring-amber-500 outline-none bg-white/80" required>
-                <p id="login-error" class="text-xs text-rose-600 font-bold mt-2 hidden"><i class="fas fa-exclamation-circle"></i> ඇතුළත් කළ PIN අංකය වැරදියි!</p>
+                <input type="password" id="pin-input" placeholder="••••" maxlength="6" class="w-full text-center text-2xl tracking-[10px] font-mono rounded-xl p-3.5 neo-input" required autofocus>
+                <p id="login-error" class="text-xs text-rose-400 font-bold mt-2.5 hidden flex items-center justify-center gap-1.5">
+                    <i class="fas fa-exclamation-triangle text-rose-500"></i> ඇතුළත් කළ PIN අංකය වැරදියි!
+                </p>
             </div>
-            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all active:scale-95 text-sm">
-                Unlock System <i class="fas fa-arrow-right ml-1"></i>
+            <button type="submit" class="w-full btn-neo-amber py-3.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
+                <i class="fas fa-unlock-alt"></i> Unlock System <i class="fas fa-arrow-right"></i>
             </button>
         </form>
         
-        <p class="text-[11px] text-slate-400">Default PIN: <span class="font-mono font-bold text-slate-600">1234</span> (පසුව වෙනස් කරගත හැක)</p>
+        <p class="text-[11px] text-slate-400">Default PIN: <span class="font-mono font-bold text-amber-400">1234</span> (පසුව වෙනස් කරගත හැක)</p>
     </div>
 
     <!-- MAIN APP DASHBOARD (HIDDEN UNTIL LOGIN) -->
     <div id="app-screen" class="max-w-6xl mx-auto space-y-6 w-full hidden">
         <!-- Header -->
-        <div class="glass-header text-white p-6 rounded-2xl shadow-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-tr from-amber-400 to-orange-500 p-3 rounded-xl shadow-lg shadow-orange-500/30">
-                        <i class="fas fa-hammer text-xl text-slate-950"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-300 flex items-center gap-3">
-                            Smart Build Budget Tracker
-                            <span id="syncBadge" class="sync-success"><i class="fa-solid fa-cloud-check"></i> Cloud Synced</span>
-                        </h1>
-                        <p class="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">ගොඩනැගිලි පිරිවැය සහ වියදම් කළමනාකරණ පද්ධතිය</p>
-                    </div>
+        <div class="glass-header text-white p-6 rounded-3xl shadow-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-slate-700/60">
+            <div class="flex items-center space-x-4">
+                <div class="bg-gradient-to-tr from-amber-400 to-orange-500 p-3.5 rounded-2xl shadow-lg shadow-orange-500/30">
+                    <i class="fas fa-hard-hat text-2xl text-slate-950"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight text-white flex items-center gap-3">
+                        Smart Build Budget Tracker
+                        <span id="syncBadge" class="sync-loading"><i class="fa-solid fa-cloud-arrow-up"></i> Drive Syncing...</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-cyan-400 font-medium mt-0.5">ගොඩනැගිලි පිරිවැය සහ වියදම් කළමනාකරණ පද්ධතිය</p>
                 </div>
             </div>
             
             <div class="flex flex-wrap items-center gap-2.5 no-print w-full sm:w-auto">
-                <button onclick="changePIN()" class="bg-white/10 hover:bg-white/20 text-slate-200 border border-white/20 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                <button onclick="requestGoogleDriveAccess()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg transition flex items-center gap-1.5">
+                    <i class="fab fa-google-drive text-amber-400"></i> Sync Drive
+                </button>
+                <button onclick="changePIN()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
                     <i class="fas fa-key text-amber-400"></i> Change PIN
                 </button>
-                <button onclick="window.print()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold px-4 py-2 rounded-xl shadow-lg hover:scale-[1.02] transition flex items-center gap-1.5 text-xs">
+                <button onclick="window.print()" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold px-4 py-2 rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center gap-1.5 text-xs">
                     <i class="fas fa-file-pdf"></i> Print PDF
                 </button>
                 <button onclick="clearAllData()" class="bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 px-3.5 py-2 rounded-xl font-semibold transition text-xs flex items-center gap-1.5">
                     <i class="fas fa-trash-alt"></i> Clear All
                 </button>
-                <button onclick="logout()" class="bg-slate-700/50 hover:bg-slate-700/80 text-slate-300 border border-slate-600 px-3.5 py-2 rounded-xl font-semibold transition text-xs flex items-center gap-1.5">
-                    <i class="fas fa-sign-out-alt"></i> Lock
+                <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3.5 py-2 rounded-xl font-semibold transition text-xs flex items-center gap-1.5">
+                    <i class="fas fa-lock"></i> Lock
                 </button>
             </div>
         </div>
 
         <!-- Target Budget Section -->
-        <div class="glass-card p-5 rounded-2xl shadow-xl no-print flex flex-col sm:flex-row items-center justify-between gap-4 border-l-4 border-l-amber-500">
-            <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-amber-100 text-amber-700 rounded-xl">
-                    <i class="fas fa-bullseye text-xl"></i>
+        <div class="glass-card p-5 rounded-3xl shadow-xl no-print flex flex-col sm:flex-row items-center justify-between gap-4 border-l-4 border-l-amber-500 glow-amber">
+            <div class="flex items-center space-x-3.5">
+                <div class="p-3 bg-amber-500/10 text-amber-400 rounded-2xl border border-amber-500/30">
+                    <i class="fas fa-bullseye text-2xl"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-slate-800 text-sm">සම්පූර්ණ ව්‍යාපෘති ඉලක්ක ගත බජට් එක (Overall Target Budget)</h3>
-                    <p class="text-xs text-slate-500">ඔබගේ මුළු ව්‍යාපෘතිය සඳහා වෙන් කළ මුදල ඇතුළත් කරන්න</p>
+                    <h3 class="font-extrabold text-white text-sm">සම්පූර්ණ ව්‍යාපෘති ඉලක්ක ගත බජට් එක (Overall Target Budget)</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">ඔබගේ මුළු ව්‍යාපෘතිය සඳහා වෙන් කළ මුදල ඇතුළත් කරන්න</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 w-full sm:w-auto">
-                <span class="text-sm font-bold text-slate-600">Rs.</span>
-                <input type="number" id="overall-target-input" placeholder="e.g. 5000000" class="w-full sm:w-56 rounded-xl border border-slate-300 p-2.5 text-sm font-mono focus:ring-2 focus:ring-amber-500 outline-none bg-white">
-                <button onclick="setOverallTarget()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-sm transition">
-                    Set
+                <span class="text-sm font-bold text-amber-400 font-mono">Rs.</span>
+                <input type="number" id="overall-target-input" placeholder="e.g. 5000000" class="w-full sm:w-56 rounded-xl p-2.5 text-sm font-mono neo-input">
+                <button onclick="setOverallTarget()" class="btn-neo-amber px-4 py-2.5 rounded-xl text-xs font-black">
+                    Set Target
                 </button>
             </div>
         </div>
 
         <!-- Summary Dashboard -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div class="glass-card p-6 rounded-2xl shadow-xl relative overflow-hidden">
+            <div class="glass-card p-6 rounded-3xl shadow-xl relative overflow-hidden border-l-4 border-l-cyan-500 glow-cyan">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500" id="est-card-title">Target Budget</span>
-                    <span class="p-2 bg-blue-100 text-blue-600 rounded-lg text-xs"><i class="fas fa-calculator"></i></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400" id="est-card-title">Target Budget</span>
+                    <span class="p-2.5 bg-cyan-500/10 text-cyan-400 rounded-xl border border-cyan-500/20 text-xs"><i class="fas fa-calculator"></i></span>
                 </div>
-                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
+                <div class="text-2xl sm:text-3xl font-black text-cyan-400 tracking-tight font-mono">
                     Rs. <span id="total-est">0.00</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2" id="est-card-sub">ඉලක්කගත Target Budget එක</p>
+                <p class="text-[11px] text-slate-400 mt-2 font-medium" id="est-card-sub">ඉලක්කගත Target Budget එක</p>
             </div>
 
-            <div class="glass-card p-6 rounded-2xl shadow-xl relative overflow-hidden">
+            <div class="glass-card p-6 rounded-3xl shadow-xl relative overflow-hidden border-l-4 border-l-purple-500 glow-purple">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Actual Spent</span>
-                    <span class="p-2 bg-purple-100 text-purple-600 rounded-lg text-xs"><i class="fas fa-receipt"></i></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Actual Spent</span>
+                    <span class="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20 text-xs"><i class="fas fa-receipt"></i></span>
                 </div>
-                <div class="text-2xl sm:text-3xl font-extrabold text-purple-700 tracking-tight font-mono">
+                <div class="text-2xl sm:text-3xl font-black text-purple-400 tracking-tight font-mono">
                     Rs. <span id="total-act">0.00</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2">සැබවින්ම සිදු වූ මුළු වියදම</p>
+                <p class="text-[11px] text-slate-400 mt-2 font-medium">සැබවින්ම සිදු වූ මුළු වියදම</p>
             </div>
 
-            <div class="glass-card p-6 rounded-2xl shadow-xl relative overflow-hidden" id="balance-card">
+            <div class="glass-card p-6 rounded-3xl shadow-xl relative overflow-hidden border-l-4 border-l-emerald-500 glow-emerald" id="balance-card">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Target Balance / Variance</span>
-                    <span class="p-2 bg-emerald-100 text-emerald-600 rounded-lg text-xs"><i class="fas fa-wallet"></i></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Target Balance / Variance</span>
+                    <span class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 text-xs"><i class="fas fa-wallet"></i></span>
                 </div>
-                <div class="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono" id="balance-text-color">
+                <div class="text-2xl sm:text-3xl font-black tracking-tight font-mono" id="balance-text-color">
                     Rs. <span id="total-diff">0.00</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2" id="balance-status-label">ඉතිරි මුදල හෝ අතිරේක වියදම</p>
+                <p class="text-[11px] text-slate-400 mt-2 font-medium" id="balance-status-label">ඉතිරි මුදල හෝ අතිරේක වියදම</p>
             </div>
         </div>
 
         <!-- Forms & Tables -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div class="lg:col-span-4 no-print">
-                <div class="glass-card p-6 rounded-2xl shadow-xl space-y-4">
-                    <div class="flex items-center space-x-2 border-b border-slate-200 pb-3">
-                        <i class="fas fa-plus-circle text-indigo-600 text-lg"></i>
-                        <h2 class="text-base font-bold text-slate-800">නව වියදමක් ඇතුළත් කරන්න</h2>
+                <div class="glass-card p-6 rounded-3xl shadow-xl space-y-4">
+                    <div class="flex items-center space-x-2.5 border-b border-slate-700/60 pb-3">
+                        <i class="fas fa-plus-circle text-cyan-400 text-xl"></i>
+                        <h2 class="text-base font-bold text-white">නව වියදමක් ඇතුළත් කරන්න</h2>
                     </div>
 
                     <form id="budget-form" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Phase / පියවර</label>
-                            <input type="text" id="phase" list="phase-suggestions" placeholder="e.g. අත්තිවාරම..." class="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none bg-white" required>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Phase / පියවර</label>
+                            <input type="text" id="phase" list="phase-suggestions" placeholder="e.g. අත්තිවාරම..." class="w-full rounded-xl p-3 text-sm neo-input" required>
                             <datalist id="phase-suggestions">
                                 <option value="අත්තිවාරම (Foundation)">
                                 <option value="කොන්ක්‍රීට් සහ සැකිල්ල (Structure)">
@@ -191,22 +295,22 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Item / භාණ්ඩය හෝ සේවාව</label>
-                            <input type="text" id="itemName" placeholder="උදා: සිමෙන්ති කොට්ට 100යි" class="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none bg-white" required>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Item / භාණ්ඩය හෝ සේවාව</label>
+                            <input type="text" id="itemName" placeholder="උදා: සිමෙන්ති කොට්ට 100යි" class="w-full rounded-xl p-3 text-sm neo-input" required>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Item Est. (Rs)</label>
-                                <input type="number" id="estCost" min="0" step="any" placeholder="0.00" class="w-full rounded-xl border border-slate-300 p-3 text-sm font-mono outline-none bg-white">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Est. (Rs)</label>
+                                <input type="number" id="estCost" min="0" step="any" placeholder="0.00" class="w-full rounded-xl p-3 text-sm font-mono neo-input">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Actual Cost (Rs)</label>
-                                <input type="number" id="actCost" min="0" step="any" placeholder="0.00" class="w-full rounded-xl border border-slate-300 p-3 text-sm font-mono outline-none bg-white">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Actual (Rs)</label>
+                                <input type="number" id="actCost" min="0" step="any" placeholder="0.00" class="w-full rounded-xl p-3 text-sm font-mono neo-input">
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:from-indigo-700 hover:to-purple-700 transition flex items-center justify-center gap-2 text-sm">
+                        <button type="submit" class="w-full btn-neo-indigo py-3.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
                             <i class="fas fa-check-circle"></i> එකතු කරන්න (Add Item)
                         </button>
                     </form>
@@ -214,11 +318,12 @@
             </div>
 
             <div class="lg:col-span-8 space-y-6">
-                <div class="glass-card p-6 rounded-2xl shadow-xl">
-                    <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-chart-pie text-purple-600 text-lg"></i>
-                            <h2 class="text-base font-bold text-slate-800">පියවර අනුව වියදම් ප්‍රතිශතය</h2>
+                <!-- Doughnut Chart Section -->
+                <div class="glass-card p-6 rounded-3xl shadow-xl">
+                    <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
+                        <div class="flex items-center space-x-2.5">
+                            <i class="fas fa-chart-pie text-purple-400 text-xl"></i>
+                            <h2 class="text-base font-bold text-white">පියවර අනුව වියදම් ප්‍රතිශතය</h2>
                         </div>
                     </div>
                     <div class="relative h-64 sm:h-72 w-full flex items-center justify-center">
@@ -226,19 +331,20 @@
                     </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-2xl shadow-xl overflow-hidden">
-                    <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-list-alt text-blue-600 text-lg"></i>
-                            <h2 class="text-base font-bold text-slate-800">වියදම් ලේඛනය (Expense Records)</h2>
+                <!-- Expense Records Table -->
+                <div class="glass-card p-6 rounded-3xl shadow-xl overflow-hidden">
+                    <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
+                        <div class="flex items-center space-x-2.5">
+                            <i class="fas fa-list-alt text-cyan-400 text-xl"></i>
+                            <h2 class="text-base font-bold text-white">වියදම් ලේඛනය (Expense Records)</h2>
                         </div>
-                        <span id="record-count" class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full">0 Records</span>
+                        <span id="record-count" class="text-xs font-bold bg-slate-800 text-cyan-400 border border-slate-700 px-3 py-1 rounded-full">0 Records</span>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                    <div class="table-scroll-container">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead>
-                                <tr class="bg-slate-100 text-slate-600 text-xs uppercase font-bold border-b border-slate-200">
+                                <tr class="bg-slate-900 text-slate-400 text-xs uppercase font-bold border-b border-slate-700">
                                     <th class="p-3">Phase & Item</th>
                                     <th class="p-3 text-right">Estimated</th>
                                     <th class="p-3 text-right">Actual Spent</th>
@@ -246,12 +352,12 @@
                                     <th class="p-3 text-center no-print">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-body" class="text-sm divide-y divide-slate-100"></tbody>
+                            <tbody id="table-body" class="text-sm divide-y divide-slate-800"></tbody>
                         </table>
                     </div>
 
-                    <div id="empty-state" class="text-center py-10 text-slate-400">
-                        <i class="fas fa-clipboard-list text-4xl mb-3 text-slate-300"></i>
+                    <div id="empty-state" class="text-center py-12 text-slate-500">
+                        <i class="fas fa-clipboard-list text-4xl mb-3 text-slate-600 animate-pulse"></i>
                         <p class="text-sm font-medium">තවම කිසිදු වියදමක් ඇතුළත් කර නොමැත.</p>
                     </div>
                 </div>
@@ -272,13 +378,12 @@
         };
     </script>
 
-    <!-- 2. LIVE GOOGLE DRIVE DATABASE DEVICE-LOCK & AUTO-SYNC SCRIPT -->
+    <!-- 2. DEVICE-LOCK LICENSE VALIDATION ENGINE -->
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const clientKey = urlParams.get('key');
         const customEndpoint = urlParams.get('endpoint');
 
-        // ඔබ ලබාගත් Google Web App URL එක මෙතැනට තබන්න:
         const DEFAULT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzvEOijNAgkKmucXoNPWT6D0uESaVGl1zM70Wm03ql_ySepn1s9jwoud3_Go77HBQCW/exec";
         const GOOGLE_SCRIPT_URL = customEndpoint ? decodeURIComponent(customEndpoint) : DEFAULT_ENDPOINT;
 
@@ -286,7 +391,7 @@
 
         (function() {
             if (!clientKey) {
-                showBlocked("⛔ Access Denied!", "Valid License Key Required in URL (e.g. ?key=build_001)");
+                showBlocked("⛔ Access Denied!", "Valid License Key Required in URL");
                 return;
             }
 
@@ -297,18 +402,12 @@
                 .then(data => {
                     if (data.status === "SUCCESS") {
                         isLicenseVerified = true;
-                        if (data.cloudData && data.cloudData.trim().length > 0) {
-                            try {
-                                const parsedCloud = JSON.parse(data.cloudData);
-                                restoreStateFromCloud(parsedCloud);
-                            } catch(err) { console.error("Cloud Data Restore Error", err); }
-                        }
                     } else {
                         showBlocked("⛔ Access Denied!", data.message);
                     }
                 })
                 .catch(err => {
-                    showBlocked("⛔ Verification Error", "Unable to connect to Google Drive verification server.");
+                    showBlocked("⛔ Verification Error", "Unable to connect to license verification server.");
                 });
 
             function showBlocked(title, msg) {
@@ -321,34 +420,151 @@
                     </div>`;
             }
         })();
-
-        function syncDataToCloud(statePayload) {
-            if (!clientKey || !isLicenseVerified) return;
-            const syncBadge = document.getElementById('syncBadge');
-            if (syncBadge) {
-                syncBadge.className = "sync-loading";
-                syncBadge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Syncing...`;
-            }
-
-            const payload = encodeURIComponent(JSON.stringify(statePayload));
-            fetch(`${GOOGLE_SCRIPT_URL}?key=${encodeURIComponent(clientKey)}&action=save_data&payload=${payload}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (syncBadge) {
-                        syncBadge.className = "sync-success";
-                        syncBadge.innerHTML = `<i class="fa-solid fa-cloud-check"></i> Cloud Synced`;
-                    }
-                })
-                .catch(err => {
-                    if (syncBadge) {
-                        syncBadge.className = "sync-loading";
-                        syncBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Sync Failed`;
-                    }
-                });
-        }
     </script>
 
-    <!-- 3. MAIN APP LOGIC SCRIPT -->
+    <!-- 3. GOOGLE DRIVE APPDATA AUTO-SYNC ENGINE (GIS API) -->
+    <script>
+        // ⚠️ මෙන්න මේ රේඛාවේ ඇති "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com" වෙනුවට ඔබේ Client ID එක Paste කරන්න:
+        const GOOGLE_CLIENT_ID = "121225169916-0ep54f7ls5ht5u972p7b2qdfttjug54r.apps.googleusercontent.com"; 
+        const SCOPES = "https://www.googleapis.com/auth/drive.appdata";
+
+        let tokenClient;
+        let gAccessToken = localStorage.getItem('g_drive_token_build') || null;
+        let driveFileId = localStorage.getItem('g_drive_file_id_build') || null;
+
+        function initGoogleDriveAuth() {
+            if (typeof google === 'undefined' || !google.accounts) return;
+
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: SCOPES,
+                callback: async (response) => {
+                    if (response.access_token) {
+                        gAccessToken = response.access_token;
+                        localStorage.setItem('g_drive_token_build', gAccessToken);
+                        updateSyncBadge('sync-success', '<i class="fa-solid fa-cloud-check"></i> Google Drive Synced');
+                        await fetchOrInitDriveData();
+                    }
+                },
+            });
+
+            if (!gAccessToken) {
+                requestGoogleDriveAccess();
+            } else {
+                updateSyncBadge('sync-success', '<i class="fa-solid fa-cloud-check"></i> Google Drive Linked');
+            }
+        }
+
+        function requestGoogleDriveAccess() {
+            if (tokenClient) {
+                tokenClient.requestAccessToken({ prompt: '' });
+            }
+        }
+
+        function updateSyncBadge(cssClass, html) {
+            const badge = document.getElementById('syncBadge');
+            if (badge) {
+                badge.className = cssClass;
+                badge.innerHTML = html;
+            }
+        }
+
+        async function fetchOrInitDriveData() {
+            if (!gAccessToken) return;
+            try {
+                let res = await fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='smart_build_backup.json'", {
+                    headers: { 'Authorization': `Bearer ${gAccessToken}` }
+                });
+                let data = await res.json();
+
+                if (data.files && data.files.length > 0) {
+                    driveFileId = data.files[0].id;
+                    localStorage.setItem('g_drive_file_id_build', driveFileId);
+                    await downloadDriveData(driveFileId);
+                } else {
+                    await createDriveFile();
+                }
+            } catch (err) {
+                console.log("Drive Fetch Error:", err);
+            }
+        }
+
+        async function createDriveFile() {
+            const fileMetadata = {
+                name: 'smart_build_backup.json',
+                parents: ['appDataFolder']
+            };
+            const payload = {
+                expenses: expenses,
+                overallTargetBudget: overallTargetBudget
+            };
+
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
+            form.append('file', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+
+            let res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&spaces=appDataFolder", {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${gAccessToken}` },
+                body: form
+            });
+            let file = await res.json();
+            if (file.id) {
+                driveFileId = file.id;
+                localStorage.setItem('g_drive_file_id_build', driveFileId);
+            }
+        }
+
+        async function syncToDrive() {
+            if (!gAccessToken) return;
+            if (!driveFileId) {
+                await fetchOrInitDriveData();
+                return;
+            }
+
+            try {
+                updateSyncBadge('sync-loading', '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...');
+                const payload = {
+                    expenses: expenses,
+                    overallTargetBudget: overallTargetBudget
+                };
+
+                await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${gAccessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                updateSyncBadge('sync-success', '<i class="fa-solid fa-cloud-check"></i> Drive Auto-Synced');
+            } catch (err) {
+                updateSyncBadge('sync-loading', '<i class="fa-solid fa-triangle-exclamation"></i> Sync Error');
+            }
+        }
+
+        async function downloadDriveData(fileId) {
+            try {
+                let res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                    headers: { 'Authorization': `Bearer ${gAccessToken}` }
+                });
+                let data = await res.json();
+
+                if (data && data.expenses) {
+                    restoreStateFromCloud(data);
+                }
+            } catch (err) {
+                console.log("Download error:", err);
+            }
+        }
+
+        window.onload = () => {
+            setTimeout(initGoogleDriveAuth, 1000);
+        };
+    </script>
+
+    <!-- 4. MAIN APP LOGIC SCRIPT -->
     <script>
         const DEFAULT_PIN = "1234";
         let userPIN = localStorage.getItem('appPIN') || DEFAULT_PIN;
@@ -461,16 +677,19 @@
             document.getElementById('total-act').innerText = formatMoney(sumActual);
             
             const diffEl = document.getElementById('total-diff');
+            const balanceCard = document.getElementById('balance-card');
             const balanceTextColor = document.getElementById('balance-text-color');
             const balanceStatusLabel = document.getElementById('balance-status-label');
 
             diffEl.innerText = formatMoney(Math.abs(diff));
 
             if (diff < 0) {
-                balanceTextColor.className = "text-2xl sm:text-3xl font-extrabold text-rose-600 font-mono";
+                balanceCard.className = "glass-card p-6 rounded-3xl shadow-xl relative overflow-hidden border-l-4 border-l-rose-500 glow-rose";
+                balanceTextColor.className = "text-2xl sm:text-3xl font-black text-rose-400 font-mono";
                 balanceStatusLabel.innerText = "Target Budget එක ඉක්මවා ගොස් ඇත!";
             } else {
-                balanceTextColor.className = "text-2xl sm:text-3xl font-extrabold text-emerald-600 font-mono";
+                balanceCard.className = "glass-card p-6 rounded-3xl shadow-xl relative overflow-hidden border-l-4 border-l-emerald-500 glow-emerald";
+                balanceTextColor.className = "text-2xl sm:text-3xl font-black text-emerald-400 font-mono";
                 balanceStatusLabel.innerText = "Target Budget එකෙන් ඉතිරි මුදල";
             }
 
@@ -488,13 +707,13 @@
             if (labels.length === 0 || dataValues.every(val => val === 0)) {
                 myChart = new Chart(ctx, {
                     type: 'doughnut',
-                    data: { labels: ['No Actual Data'], datasets: [{ data: [1], backgroundColor: ['#e2e8f0'] }] },
+                    data: { labels: ['No Actual Data'], datasets: [{ data: [1], backgroundColor: ['#334155'] }] },
                     options: { responsive: true, maintainAspectRatio: false }
                 });
                 return;
             }
 
-            const colors = ['#6366f1', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#06b6d4', '#f43f5e', '#3b82f6'];
+            const colors = ['#06b6d4', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#f43f5e', '#a855f7'];
 
             myChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -505,7 +724,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } }
                 }
             });
         }
@@ -521,24 +740,24 @@
                 const diff = est - act;
 
                 let statusBadge = '';
-                if (act === 0) statusBadge = `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-md text-xs font-bold">Pending Actual</span>`;
-                else if (diff >= 0) statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-xs font-bold">ඉතිරි Rs.${formatMoney(diff)}</span>`;
-                else statusBadge = `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded-md text-xs font-bold">වැඩිපුර Rs.${formatMoney(Math.abs(diff))}</span>`;
+                if (act === 0) statusBadge = `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-lg text-xs font-bold">Pending Actual</span>`;
+                else if (diff >= 0) statusBadge = `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-xs font-bold">ඉතිරි Rs.${formatMoney(diff)}</span>`;
+                else statusBadge = `<span class="bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg text-xs font-bold">වැඩිපුර Rs.${formatMoney(Math.abs(diff))}</span>`;
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800";
                 tr.innerHTML = `
                     <td class="p-3">
-                        <div class="font-bold text-slate-800">${exp.itemName}</div>
-                        <div class="text-xs font-medium text-indigo-600 bg-indigo-50 w-fit px-2 py-0.5 rounded mt-0.5">${exp.phase}</div>
+                        <div class="font-bold text-white">${exp.itemName}</div>
+                        <div class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 w-fit px-2 py-0.5 rounded-md mt-1">${exp.phase}</div>
                     </td>
-                    <td class="p-3 text-right font-mono text-slate-600">${est > 0 ? 'Rs. ' + formatMoney(est) : '-'}</td>
-                    <td class="p-3 text-right font-mono text-slate-900 font-bold">${act > 0 ? 'Rs. ' + formatMoney(act) : '<span class="text-slate-400 font-normal italic text-xs">නොමැත</span>'}</td>
+                    <td class="p-3 text-right font-mono text-slate-400">${est > 0 ? 'Rs. ' + formatMoney(est) : '-'}</td>
+                    <td class="p-3 text-right font-mono text-amber-400 font-bold">${act > 0 ? 'Rs. ' + formatMoney(act) : '<span class="text-slate-500 font-normal italic text-xs">නොමැත</span>'}</td>
                     <td class="p-3 text-right">${statusBadge}</td>
                     <td class="p-3 text-center no-print">
                         <div class="flex items-center justify-center space-x-1">
-                            <button onclick="editActualCost(${index})" class="text-indigo-600 hover:text-indigo-800 p-2 rounded-lg" title="Edit Actual Spent"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteRecord(${index})" class="text-slate-400 hover:text-rose-600 p-2 rounded-lg" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                            <button onclick="editActualCost(${index})" class="text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-lg font-bold hover:bg-indigo-600/40" title="Edit Actual Spent"><i class="fas fa-edit"></i> Edit</button>
+                            <button onclick="deleteRecord(${index})" class="text-xs text-rose-400 hover:text-rose-300 p-1.5" title="Delete"><i class="fas fa-trash-alt"></i></button>
                         </div>
                     </td>
                 `;
@@ -549,13 +768,9 @@
         }
 
         function saveAndSyncBuildState() {
-            const statePayload = {
-                expenses: expenses,
-                overallTargetBudget: overallTargetBudget
-            };
             localStorage.setItem('budgetDataV5', JSON.stringify(expenses));
             localStorage.setItem('overallTargetBudgetV5', overallTargetBudget);
-            syncDataToCloud(statePayload);
+            syncToDrive();
         }
 
         function restoreStateFromCloud(state) {
