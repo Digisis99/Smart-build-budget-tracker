@@ -149,10 +149,10 @@
         }
     </style>
 </head>
-<body class="min-h-screen p-4 sm:p-6 md:p-8 flex items-center justify-center">
+<body class="min-h-screen p-4 sm:p-6 md:p-8 flex flex-col items-center justify-between">
 
     <!-- LOGIN / AUTHENTICATION SCREEN -->
-    <div id="login-screen" class="w-full max-w-md glass-card p-8 rounded-3xl text-center space-y-6 border border-white/20 glow-purple">
+    <div id="login-screen" class="w-full max-w-md glass-card p-8 rounded-3xl text-center space-y-6 border border-white/20 glow-purple my-auto">
         <div class="w-20 h-20 bg-gradient-to-tr from-amber-400 via-orange-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-amber-500/30 animate-bounce">
             <i class="fas fa-hammer text-3xl text-slate-950"></i>
         </div>
@@ -176,6 +176,12 @@
         </form>
         
         <p class="text-[11px] text-slate-400">Default PIN: <span class="font-mono font-bold text-amber-400">1234</span> (පසුව වෙනස් කරගත හැක)</p>
+
+        <!-- LOGIN FOOTER COPYRIGHT NOTICE -->
+        <div class="pt-4 border-t border-slate-800 text-[10px] text-slate-500 space-y-1">
+            <p><i class="fas fa-shield-halved text-cyan-400"></i> Encrypted & Device-Locked Security System</p>
+            <p>© 2026 <strong>Smart Build Tracker OS Pro</strong>. All Rights Reserved.</p>
+        </div>
     </div>
 
     <!-- MAIN APP DASHBOARD (HIDDEN UNTIL LOGIN) -->
@@ -363,6 +369,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- SYSTEM FOOTER COPYRIGHT NOTICE -->
+        <footer class="w-full text-center py-6 border-t border-slate-800/80 text-slate-500 text-xs space-y-1.5 no-print">
+            <div class="flex flex-wrap items-center justify-center gap-3 font-semibold text-slate-400">
+                <span><i class="fas fa-shield-halved text-cyan-400"></i> Proprietary Security System</span>
+                <span>•</span>
+                <span><i class="fab fa-google-drive text-emerald-400"></i> Client AppData Drive Backup</span>
+            </div>
+            <p>© 2026 <strong>Smart Build Budget Tracker OS Pro</strong>. All Rights Reserved.</p>
+        </footer>
     </div>
 
     <!-- 1. ANTI-COPY & ANTI-INSPECT PROTECTION SCRIPT -->
@@ -594,7 +610,6 @@
         function showApp() {
             loginScreen.classList.add('hidden');
             appScreen.classList.remove('hidden');
-            document.body.classList.remove('flex', 'items-center', 'justify-center');
             renderTable();
         }
 
